@@ -1,0 +1,37 @@
+version: '3'
+services:
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase
+    ports:
+      - 6300:3000
+    environment:
+      MB_DB_TYPE: mysql
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 3306
+      MB_DB_USER: root
+      MB_DB_PASS: rootpassword
+      MB_DB_HOST: db
+    depends_on:
+      - db
+    restart: always
+    platform: linux/amd64
+
+  db:
+    image: mysql:8.0.33
+    platform: linux/amd64
+    container_name: metabase-mysql
+    ports:
+      - 63306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: metabase
+      MYSQL_USER: metabase
+      MYSQL_PASSWORD: metabasepassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./export/:/var/lib/mysql-files/
+    restart: always
+
+volumes:
+  mysql_data:

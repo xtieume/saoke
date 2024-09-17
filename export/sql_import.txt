@@ -1,0 +1,186 @@
+CREATE TABLE `transactions` (
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL COMMENT 'ID tự động tăng, khóa chính của bảng, sử dụng BIGINT cho datasets lớn',
+  `transaction_number` VARCHAR(50) COLLATE utf8mb4_unicode_ci NULL COMMENT 'Số thứ tự giao dịch (STT)', -- Không phân biệt hoa thường
+  `transaction_date` DATETIME NULL COMMENT 'Ngày và thời gian giao dịch',
+  `credit_amount` DECIMAL(20,2) NULL COMMENT 'Số tiền ghi có (Credit)',
+  `offset_name` VARCHAR(255) COLLATE utf8mb4_unicode_ci NULL COMMENT 'Tên đối ứng', -- Không phân biệt hoa thường
+  `debit_amount` DECIMAL(20,2) NULL COMMENT 'Số tiền ghi nợ (Debit)',
+  `balance` DECIMAL(20,2) NULL COMMENT 'Số dư tài khoản sau giao dịch',
+  `reference_number` VARCHAR(100) COLLATE utf8mb4_unicode_ci NULL COMMENT 'Số tham chiếu giao dịch', -- Không phân biệt hoa thường
+  `bank` VARCHAR(255) COLLATE utf8mb4_unicode_ci NULL COMMENT 'Ngân hàng', -- Không phân biệt hoa thường
+  `note` VARCHAR(255) COLLATE utf8mb4_unicode_ci NULL COMMENT 'Ghi chú thêm', -- Không phân biệt hoa thường
+  `transaction_destination` TEXT COLLATE utf8mb4_unicode_ci NULL COMMENT 'Nguồn tiền đến', -- Không phân biệt hoa thường
+  `transaction_description` TEXT COLLATE utf8mb4_unicode_ci NULL COMMENT 'Diễn giải chi tiết về giao dịch', -- Không phân biệt hoa thường
+  PRIMARY KEY (`id`),
+  FULLTEXT KEY `ft_search` (`transaction_number`,`reference_number`,`offset_name`, `transaction_description`) -- Full-text search
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+
+
+LOAD DATA INFILE '/var/lib/mysql-files/mttq_vcb.0109.1009.csv'
+INTO TABLE transactions
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(
+  @col1, @col2, @col3, @col4, @col5, @col6, @col7, @col8
+)
+SET
+  transaction_date = STR_TO_DATE(@col1, '%d/%m/%Y'), -- Chuyển đổi định dạng ngày từ DD/MM/YYYY sang YYYY-MM-DD
+  transaction_number = @col2,
+  credit_amount = NULLIF(REPLACE(@col4, '.', ''), ''), -- Loại bỏ dấu chấm trong số tiền lớn
+  balance = NULLIF(REPLACE(@col5, '.', ''), ''), -- Loại bỏ dấu chấm và chuyển giá trị rỗng thành NULL
+  transaction_description = @col6,
+  bank = "VCB",
+  note = "Dữ liệu từ 1/9 đến 10/9",
+  transaction_destination = "MTTQ"
+
+
+LOAD DATA INFILE '/var/lib/mysql-files/mttq_vcb.1109.csv'
+INTO TABLE transactions
+FIELDS TERMINATED BY ',' -- Các trường được ngăn cách bởi dấu phẩy
+OPTIONALLY ENCLOSED BY '"' -- Giá trị có thể được bao quanh bởi dấu ngoặc kép
+ESCAPED BY '"' -- Xử lý dấu ngoặc kép kép như một dấu ngoặc kép thông thường trong trường hợp chuỗi chứa dấu ngoặc kép kép
+LINES TERMINATED BY '\n' -- Mỗi dòng trong CSV kết thúc bằng xuống dòng
+IGNORE 0 ROWS -- Bỏ qua dòng tiêu đề
+(
+  @col1, @col2, @col3, @col4, @col5, @col6
+)
+SET
+  transaction_date = STR_TO_DATE(@col2, '%d/%m/%Y'), -- Chuyển đổi định dạng ngày từ DD/MM/YYYY sang YYYY-MM-DD
+  credit_amount = NULLIF(REPLACE(@col3, '.', ''), ''), -- Loại bỏ dấu chấm trong số tiền lớn
+  transaction_description = @col4,
+  bank = "VCB",
+  note = "Dữ liệu ngày 11/9",
+  transaction_destination = "MTTQ";
+
+LOAD DATA INFILE '/var/lib/mysql-files/mttq_vcb.1209.csv'
+INTO TABLE transactions
+FIELDS TERMINATED BY ',' -- Các trường được ngăn cách bởi dấu phẩy
+OPTIONALLY ENCLOSED BY '"' -- Giá trị có thể được bao quanh bởi dấu ngoặc kép
+ESCAPED BY '"' -- Xử lý dấu ngoặc kép kép như một dấu ngoặc kép thông thường trong trường hợp chuỗi chứa dấu ngoặc kép kép
+LINES TERMINATED BY '\n' -- Mỗi dòng trong CSV kết thúc bằng xuống dòng
+IGNORE 0 ROWS -- Bỏ qua dòng tiêu đề
+(
+  @col1, @col2, @col3, @col4, @col5, @col6
+)
+SET
+  transaction_date = STR_TO_DATE(@col2, '%d/%m/%Y'), -- Chuyển đổi định dạng ngày từ DD/MM/YYYY sang YYYY-MM-DD
+  credit_amount = NULLIF(REPLACE(@col3, '.', ''), ''), -- Loại bỏ dấu chấm trong số tiền lớn
+  transaction_description = @col4,
+  bank = "VCB",
+  note = "Dữ liệu ngày 12/9",
+  transaction_destination = "MTTQ";
+
+LOAD DATA INFILE '/var/lib/mysql-files/mttq_vcb.1309.csv'
+INTO TABLE transactions
+FIELDS TERMINATED BY ',' -- Các trường được ngăn cách bởi dấu phẩy
+OPTIONALLY ENCLOSED BY '"' -- Giá trị có thể được bao quanh bởi dấu ngoặc kép
+ESCAPED BY '"' -- Xử lý dấu ngoặc kép kép như một dấu ngoặc kép thông thường trong trường hợp chuỗi chứa dấu ngoặc kép kép
+LINES TERMINATED BY '\n' -- Mỗi dòng trong CSV kết thúc bằng xuống dòng
+IGNORE 0 ROWS -- Bỏ qua dòng tiêu đề
+(
+  @col1, @col2, @col3, @col4, @col5, @col6
+)
+SET
+  transaction_date = STR_TO_DATE(@col2, '%d/%m/%Y'), -- Chuyển đổi định dạng ngày từ DD/MM/YYYY sang YYYY-MM-DD
+  credit_amount = NULLIF(REPLACE(@col3, '.', ''), ''), -- Loại bỏ dấu chấm trong số tiền lớn
+  transaction_description = @col4,
+  bank = "VCB",
+  note = "Dữ liệu ngày 13/9",
+  transaction_destination = "MTTQ";
+
+LOAD DATA INFILE '/var/lib/mysql-files/bvdcttu_vietin.1009.1209.csv'
+INTO TABLE transactions
+FIELDS TERMINATED BY ',' -- Các trường được ngăn cách bởi dấu tab
+OPTIONALLY ENCLOSED BY '"' -- Giá trị có thể được bao quanh bởi dấu ngoặc kép
+ESCAPED BY '"' -- Xử lý dấu ngoặc kép kép như một dấu ngoặc kép thông thường
+LINES TERMINATED BY '\n' -- Mỗi dòng trong CSV kết thúc bằng dấu xuống dòng
+IGNORE 0 ROWS -- Bỏ qua dòng tiêu đề và dòng mô tả các cột
+(
+  @col1, @col2, @col3, @col4, @col5, @col6, @col7
+)
+SET
+  transaction_date = STR_TO_DATE(@col2, '%d/%m/%Y %H:%i:%s'), -- Chuyển đổi ngày giờ từ DD/MM/YYYY HH:MM:SS
+  credit_amount = NULLIF(REPLACE(@col4, '.', ''), ''), -- Loại bỏ dấu chấm trong số tiền lớn
+  transaction_description = @col3, -- Mô tả giao dịch
+  offset_name = @col5, -- Tên đối ứng (offset_name)
+  bank = "VIETINBANK",
+  note = "Dữ liệu từ ngày 10/9 đến 12/9",
+  transaction_destination = "BVDCTTU";
+
+LOAD DATA INFILE '/var/lib/mysql-files/mttq_agribank_hanoi.0909.1209.csv'
+INTO TABLE transactions
+FIELDS TERMINATED BY ',' -- Các trường được ngăn cách bởi dấu phẩy
+OPTIONALLY ENCLOSED BY '"' -- Giá trị có thể được bao quanh bởi dấu ngoặc kép
+ESCAPED BY '"' -- Xử lý dấu ngoặc kép kép
+LINES TERMINATED BY '\n' -- Mỗi dòng trong CSV kết thúc bằng dấu xuống dòng
+IGNORE 0 ROWS -- Không bỏ qua dòng nào
+(
+  @col1, -- Ngày Date
+  @col2, -- Ghi chú Remark
+  @col3, -- Nợ Dr
+  @col4, -- Có Cr (số tiền)
+  @col5, -- Số dư Balance
+  @col6, -- Số tham chiếu Ref. no
+  @col7, -- AGRIBANK
+  @col8  -- MTTQ
+)
+SET
+  transaction_date = CASE 
+                      WHEN @col1 != '' THEN STR_TO_DATE(@col1, '%d/%m/%Y') 
+                      ELSE NULL 
+                     END, -- Chỉ chuyển đổi nếu cột ngày không trống
+  transaction_description = @col2, -- Ghi chú
+  credit_amount = CASE 
+                    -- Loại bỏ tất cả dấu chấm và kiểm tra độ dài chuỗi <= 10
+                    WHEN LENGTH(REPLACE(@col4, '.', '')) <= 10 THEN NULLIF(REPLACE(@col4, '.', ''), '')
+                    ELSE NULL 
+                  END, -- Nếu độ dài chuỗi sau khi loại bỏ tất cả dấu chấm <= 10, giữ giá trị, nếu không gán NULL
+  balance = CASE 
+              -- Loại bỏ tất cả dấu chấm và kiểm tra độ dài chuỗi <= 10
+              WHEN LENGTH(REPLACE(@col5, '.', '')) <= 10 THEN NULLIF(REPLACE(@col5, '.', ''), '')
+              ELSE NULL 
+            END, -- Nếu độ dài chuỗi sau khi loại bỏ tất cả dấu chấm <= 10, giữ giá trị, nếu không gán NULL
+  transaction_number = @col6, -- Số tham chiếu
+  bank = "AGRIBANK",
+  note = "HÀ NỘI - Dữ liệu từ ngày 9/9 đến 12/9",
+  transaction_destination = "MTTQ";
+
+LOAD DATA INFILE '/var/lib/mysql-files/mttq_agribank_caobang.1009.1309.csv'
+INTO TABLE transactions
+FIELDS TERMINATED BY ',' -- Các trường được ngăn cách bởi dấu phẩy
+OPTIONALLY ENCLOSED BY '"' -- Giá trị có thể được bao quanh bởi dấu ngoặc kép
+ESCAPED BY '"' -- Xử lý dấu ngoặc kép kép
+LINES TERMINATED BY '\n' -- Mỗi dòng trong CSV kết thúc bằng dấu xuống dòng
+IGNORE 0 ROWS -- Không bỏ qua dòng nào
+(
+  @col1, -- Ngày Date
+  @col2, -- Ghi chú Remark
+  @col3, -- Nợ Dr
+  @col4, -- Có Cr (số tiền)
+  @col5, -- Số dư Balance
+  @col6, -- Số tham chiếu Ref. no
+  @col7, -- AGRIBANK
+  @col8  -- MTTQ
+)
+SET
+  transaction_date = CASE 
+                      WHEN @col1 != '' THEN STR_TO_DATE(@col1, '%d/%m/%Y') 
+                      ELSE NULL 
+                     END, -- Chỉ chuyển đổi nếu cột ngày không trống
+  transaction_description = @col2, -- Ghi chú
+  credit_amount = CASE 
+                    -- Loại bỏ tất cả dấu chấm và kiểm tra độ dài chuỗi <= 10
+                    WHEN LENGTH(REPLACE(@col4, '.', '')) <= 10 THEN NULLIF(REPLACE(@col4, '.', ''), '')
+                    ELSE NULL 
+                  END, -- Nếu độ dài chuỗi sau khi loại bỏ tất cả dấu chấm <= 10, giữ giá trị, nếu không gán NULL
+  balance = CASE 
+              -- Loại bỏ tất cả dấu chấm và kiểm tra độ dài chuỗi <= 10
+              WHEN LENGTH(REPLACE(@col5, '.', '')) <= 10 THEN NULLIF(REPLACE(@col5, '.', ''), '')
+              ELSE NULL 
+            END, -- Nếu độ dài chuỗi sau khi loại bỏ tất cả dấu chấm <= 10, giữ giá trị, nếu không gán NULL
+  transaction_number = @col6, -- Số tham chiếu
+  bank = "AGRIBANK",
+  note = "CAO BẰNG - Dữ liệu từ ngày 10/9 đến 13/9",
+  transaction_destination = "MTTQ";
